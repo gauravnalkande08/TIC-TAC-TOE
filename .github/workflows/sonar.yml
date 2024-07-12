@@ -19,7 +19,8 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v2
         with:
-          java-version: '11'  # Adjust as per your Java version requirement
+          java-version: '11'
+          distribution: 'adopt' # Adjust as per your Java version requirement
 
       - name: Install Node.js
         uses: actions/setup-node@v2
