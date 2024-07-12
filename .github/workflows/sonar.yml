@@ -5,16 +5,16 @@ on:
     branches:
       - main
 
-
 jobs:
   build:
     name: Build
     runs-on: [self-hosted]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0  # Disable shallow clone for accurate analysis
 
       - name: Change permissions for .scannerwork directory
         run: |
@@ -23,37 +23,37 @@ jobs:
 
       - name: Clean up .scannerwork directory
         run: |
-          sudo rm -rf ${{ github.workspace }}/.scannerwork || true  
-          
-      - name: Build and with Sonarqube    
+          sudo rm -rf ${{ github.workspace }}/.scannerwork || true
+
+      - name: Build and analyze with SonarQube
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          
-      - name: npm install dependencies
+
+      - name: Install npm dependencies
         run: npm install
-        
-      - name: trivy file scan
+
+      - name: Run Trivy file system scan
         run: trivy fs . > trivyfs.txt
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2  
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}  
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Docker Build and Push
         run: |
           docker build -t tic-tac-toe .
           docker tag tic-tac-toe gaurav5055/tic-tac-toe:latest
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
           docker push gaurav5055/tic-tac-toe:latest
         env:
           DOCKER_CLI_ACI: 1
+
 
         
           
